@@ -6,7 +6,7 @@ import TicketModel from "../datasource/TicketModel";
 const AddTicket = () => {
 
     let navigate = useNavigate();
-    let [values, setValues] = useState(new TicketModel());
+    let [values, setTicket] = useState(new TicketModel());
 
     const handleChange = (event) => {
         const {name, value} = event.target;
@@ -35,8 +35,6 @@ const AddTicket = () => {
             console.log(err)
         });
     };
-}
-    
     return (
         <div className="container" style={{ paddingTop: 80 }}>
             <div className="row">
@@ -46,7 +44,7 @@ const AddTicket = () => {
                     <form onSubmit={handleSubmit} className="form">
                         <div className="form-group">
                             <input type="hidden" name="id" value={values.id || ''} />
-                            <label htmlFor="ticketName">User Name</label>
+                            <label htmlFor="ticketName">User id</label>
                             <input type="text" 
                             name="ticketName" 
                             placeholder="Enter the ticket name" 
@@ -54,8 +52,40 @@ const AddTicket = () => {
                             onChange={handleChange} 
                             className="form-control" />
                         </div>
+                        <div className="form-group">
+                            <label htmlFor="status">Status</label>
+                            <input type="text" 
+                            name="status" 
+                            placeholder="Enter the status" 
+                            value={values.status || ''} 
+                            onChange={handleChange} 
+                            className="form-control" />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="description">Description</label>
+                            <textarea 
+                            name="description" 
+                            placeholder="Enter the description" 
+                            value={values.description || ''} 
+                            onChange={handleChange} 
+                            className="form-control" />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="priority">Priority</label>
+                            <input type="text" 
+                            name="priority" 
+                            placeholder="Enter the priority" 
+                            value={values.priority || ''} 
+                            onChange={handleChange} 
+                            className="form-control" />
+                        </div>
+                        <button type="submit" className="btn btn-primary">Submit</button>
+                        <Link href="#" to="admins/tickets" className="btn btn-secondary">Cancel</Link>
                     </form>
                 </div>
             </div>
         </div>
     );
+};
+
+export default AddTicket;
