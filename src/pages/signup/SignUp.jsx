@@ -1,13 +1,14 @@
 import { Box, Button, Container, Grid, Link, TextField, Typography } from '@mui/material';
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { requestPost } from '../../utils/requests';
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    username: '',
     email: '',
     password: '',
   });
+  const [message, setMessage] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -17,10 +18,20 @@ const SignUp = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission logic here
-    console.log(formData);
+    const { username, email, password } = formData;
+    try {
+      const user = await requestPost('/users', {username, email, password});
+      setMessage('User created successfully.');
+      console.log(user);
+    } catch (error) {
+      if (error.response && error.response.status === 409) {
+      setMessage('Something went wrong. Please try again.');
+      } else {
+      setMessage('An unexpected error occurred.');
+      }
+    }
   };
 
   return (
@@ -42,23 +53,12 @@ const SignUp = () => {
           margin="normal"
           required
           fullWidth
-          id="firstName"
-          label="First Name"
-          name="firstName"
-          autoComplete="given-name"
+          id="userName"
+          label="Username"
+          name="username"
+          autoComplete="username"
           autoFocus
-          value={formData.firstName}
-          onChange={handleChange}
-        />
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          id="lastName"
-          label="Last Name"
-          name="lastName"
-          autoComplete="family-name"
-          value={formData.lastName}
+          value={formData.username}
           onChange={handleChange}
         />
         <TextField
@@ -99,6 +99,7 @@ const SignUp = () => {
               </Link>
             </Grid>
           </Grid>
+          {message && <Typography>{message}</Typography>}
       </Box>
     </Container>
   );

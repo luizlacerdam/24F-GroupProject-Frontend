@@ -1,15 +1,18 @@
 import {
-    Box,
-    Button,
-    Checkbox,
-    Container,
-    FormControlLabel,
-    Grid,
-    Link,
-    TextField,
-    Typography,
+  Box,
+  Button,
+  Checkbox,
+  Container,
+  FormControlLabel,
+  Grid,
+  Link,
+  TextField,
+  Typography,
 } from '@mui/material';
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { setItem } from '../../utils/localStorageHandling';
+import { requestLogin } from '../../utils/requests';
 
 const SignIn = () => {
   const [formData, setFormData] = useState({
@@ -17,6 +20,8 @@ const SignIn = () => {
     password: '',
     rememberMe: false,
   });
+  
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value, checked, type } = e.target;
@@ -26,10 +31,21 @@ const SignIn = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission logic here
-    console.log(formData);
+    try {
+      const { email, password } = formData;
+      const response = await requestLogin('/users/login', { email, password });
+
+      // Save token and user details to local storage
+      setItem('user', { token: response.token, ...response.user });
+
+      // Navigate to the dashboard upon successful login
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Login failed:', error);
+      // Optionally handle error UI feedback (e.g., set error state)
+    }
   };
 
   return (
