@@ -41,4 +41,9 @@ export const requestPatchWithToken = async (endpoint, body, token) => {
   return data;
 };
 
+export const requestDeleteWithToken = async (endpoint, token) => {
+  const data = await api.delete(endpoint, { headers: { Authorization: token } });
+  return data;
+};
+
 export default api;
