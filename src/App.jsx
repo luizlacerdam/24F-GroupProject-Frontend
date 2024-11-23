@@ -1,94 +1,45 @@
-import { useState } from "react";
-import { AppBar, Button, IconButton, Toolbar, Typography, Box, Container, Grid, Paper } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
-
+import 'bootstrap/dist/css/bootstrap.min.css';
+import {
+  createBrowserRouter,
+  createRoutesFromElements,
+  Route,
+  RouterProvider,
+} from 'react-router-dom';
+import authLoader from './auth/authLoader';
+import Dashboard from './pages/dashboard/Dashboard';
+import Home from './pages/home/Home';
+import SignInAction from './pages/signin/Actions/SignInAction';
+import signInLoader from './pages/signin/loaders/signInLoader';
+import SignIn from './pages/signin/SignIn';
+import SignUpAction from './pages/signup/Actions/SignUpAction';
+import SignUp from './pages/signup/SignUp';
 function App() {
-  return (
-    <Box>
-      {/* Header */}
-      <AppBar position="static">
-        <Toolbar>
-          <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            sx={{ mr: 2 }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            TicketSystem
-          </Typography>
-          <Button color="inherit">Login</Button>
-        </Toolbar>
-      </AppBar>
-
-      {/* Hero Section */}
-      <Box
-        sx={{
-          backgroundColor: "#f5f5f5",
-          py: 8,
-        }}
-      >
-        <Container maxWidth="md" sx={{ textAlign: "center" }}>
-          <Typography variant="h2" component="h1" gutterBottom>
-            Welcome to TicketSystem
-          </Typography>
-          <Typography variant="h6" color="textSecondary" paragraph>
-            Manage and streamline your ticketing processes with ease. Stay organized, improve response times, and provide better support.
-          </Typography>
-          <Box sx={{ mt: 4 }}>
-            <Button variant="contained" color="primary" size="large" sx={{ mx: 2 }}>
-              Get Started
-            </Button>
-            <Button variant="outlined" color="primary" size="large" sx={{ mx: 2 }}>
-              Learn More
-            </Button>
-          </Box>
-        </Container>
-      </Box>
-
-      {/* Features Section */}
-      <Container maxWidth="lg" sx={{ py: 8 }}>
-        <Typography variant="h4" component="h2" align="center" gutterBottom>
-          Why Choose TicketSystem?
-        </Typography>
-        <Grid container spacing={4} sx={{ mt: 2 }}>
-          <Grid item xs={12} sm={6} md={4}>
-            <Paper elevation={3} sx={{ p: 3, textAlign: "center" }}>
-              <Typography variant="h5" gutterBottom>
-                Easy to Use
-              </Typography>
-              <Typography>
-                An intuitive interface makes it easy to create and manage tickets without any hassle.
-              </Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <Paper elevation={3} sx={{ p: 3, textAlign: "center" }}>
-              <Typography variant="h5" gutterBottom>
-                Customizable
-              </Typography>
-              <Typography>
-                Tailor your ticket system to fit your specific business needs.
-              </Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <Paper elevation={3} sx={{ p: 3, textAlign: "center" }}>
-              <Typography variant="h5" gutterBottom>
-                Reliable Support
-              </Typography>
-              <Typography>
-                Our team is here to help you 24/7 with any issues or questions.
-              </Typography>
-            </Paper>
-          </Grid>
-        </Grid>
-      </Container>
-    </Box>
+  const router = createBrowserRouter(
+    createRoutesFromElements(
+      <Route>
+       
+        <Route 
+          path="/sign-up" 
+          element={<SignUp />}
+          action={SignUpAction}
+        /> 
+        <Route
+          loader={ signInLoader }
+          action={ SignInAction }
+          path="/sign-in"
+          element={ <SignIn /> }
+        />
+        <Route path="/" element={<Home />} />
+        {/* Protected Routes */}
+        <Route loader={authLoader}>
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Route>
+        
+      </Route>
+    ),
   );
+
+  return <RouterProvider router={router} />;
 }
 
 export default App;
