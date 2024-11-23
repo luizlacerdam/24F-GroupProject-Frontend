@@ -2,6 +2,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { AppBar, Box, Button, Container, Grid, IconButton, Paper, Toolbar, Typography } from "@mui/material";
 
 function App() {
+  
   return (
     <Box>
       {/* Header */}
@@ -19,7 +20,9 @@ function App() {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             TicketSystem
           </Typography>
-          <Button color="inherit">Login</Button>
+          <Button type="button" href="/sign-in" color="inherit">Login</Button>
+          <Button type="button" href="/sign-up" color="inherit">Sign up</Button>
+
         </Toolbar>
       </AppBar>
 
