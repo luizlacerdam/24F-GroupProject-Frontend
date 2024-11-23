@@ -1,121 +1,53 @@
-import {
-  Box,
-  Button,
-  Checkbox,
-  Container,
-  FormControlLabel,
-  Grid,
-  Link,
-  TextField,
-  Typography,
-} from '@mui/material';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { setItem } from '../../utils/localStorageHandling';
-import { requestLogin } from '../../utils/requests';
+import { Form, useActionData, useNavigation } from 'react-router-dom';
 
-const SignIn = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    rememberMe: false,
-  });
-  
-  const navigate = useNavigate();
-
-  const handleChange = (e) => {
-    const { name, value, checked, type } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const { email, password } = formData;
-      const response = await requestLogin('/users/login', { email, password });
-
-      // Save token and user details to local storage
-      setItem('user', { token: response.token, ...response.user });
-
-      // Navigate to the dashboard upon successful login
-      navigate('/dashboard');
-    } catch (error) {
-      console.error('Login failed:', error);
-      // Optionally handle error UI feedback (e.g., set error state)
-    }
-  };
+export default function SignIn() {
+  const actionReturn = useActionData();
+  const { state } = useNavigation();
 
   return (
-    <Container component="main" maxWidth="xs">
-      <Box
-        sx={{
-          marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <Typography component="h1" variant="h5">
-          Sign In
-        </Typography>
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="email"
-            label="Email Address"
-            name="email"
-            autoComplete="email"
-            autoFocus
-            value={formData.email}
-            onChange={handleChange}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            name="password"
-            label="Password"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-            value={formData.password}
-            onChange={handleChange}
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                name="rememberMe"
-                color="primary"
-                checked={formData.rememberMe}
-                onChange={handleChange}
-              />
-            }
-            label="Remember me"
-          />
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
-          >
-            Sign In
-          </Button>
-          <Grid container>
-            <Grid item>
-              <Link href="/sign-up" variant="body2">
-                {"Don't have an account? Sign Up"}
-              </Link>
-            </Grid>
-          </Grid>
-        </Box>
-      </Box>
-    </Container>
+    <div
+      className="login template d-flex
+    justify-content-center align-items-center w-100 vh-100 bg-primary"
+    >
+      <div className="form-container p-5 rounded bg-white">
+        <Form method="post" replace>
+          <h3 className="text-center">Login</h3>
+          <div className="mb-2">
+            <label htmlFor="email">Email</label>
+            <input
+              className="form-control"
+              type="email"
+              name="email"
+              placeholder="Enter Email"
+            />
+          </div>
+          <div className="mb-2">
+            <label htmlFor="password">Password</label>
+            <input
+              className="form-control"
+              type="password"
+              name="password"
+              placeholder="Enter password"
+            />
+          </div>
+          <div className="d-grid">
+            <button
+              className="btn btn-primary"
+              disabled={ state === 'submitting' }
+            >
+              {state === 'submitting' ? 'Logging in...' : 'Log in'}
+            </button>
+          </div>
+        </Form>
+        <div className='mt-1'>
+          <a href="/sign-up">Create an account</a>
+        </div>
+        <span
+          className="d-flex justify-content-center mt-3 p-1 text-danger"
+        >
+          {actionReturn ? actionReturn.response.data.message : null}
+        </span>
+      </div>
+    </div>
   );
-};
-
-export default SignIn;
+}

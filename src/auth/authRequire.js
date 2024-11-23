@@ -5,19 +5,21 @@ import getUserToken from './getUserToken';
 
 export default async function isLoggedIn() {
   const userLocal = getItem('user');
+  console.log('userLocal', userLocal);
+  
 
   if (!userLocal) {
-    throw redirect('/login');
+    throw redirect('/sign-in');
   }
 
   try {
     const response = await requestDataWithToken(
-      '/login/validate',
+      '/users/validate',
       getUserToken(),
     );
     return response;
   } catch (er) {
     console.log(er);
-    throw redirect('/login');
+    throw redirect('/sign-in');
   }
 }

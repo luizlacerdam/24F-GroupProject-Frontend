@@ -1,108 +1,64 @@
-import { Box, Button, Container, Grid, Link, TextField, Typography } from '@mui/material';
-import { useState } from 'react';
-import { requestPost } from '../../utils/requests';
+import { Form, useActionData, useNavigation } from 'react-router-dom';
 
-const SignUp = () => {
-  const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
-  });
-  const [message, setMessage] = useState('');
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const { username, email, password } = formData;
-    try {
-      const user = await requestPost('/users', {username, email, password});
-      setMessage('User created successfully.');
-      console.log(user);
-    } catch (error) {
-      if (error.response && error.response.status === 409) {
-      setMessage('Something went wrong. Please try again.');
-      } else {
-      setMessage('An unexpected error occurred.');
-      }
-    }
-  };
+export default function SignIn() {
+  const actionReturn = useActionData();
+  console.log(actionReturn);
+  
+  const { state } = useNavigation();
 
   return (
-    <Container maxWidth="xs">
-      <Box
-        component="form"
-        onSubmit={handleSubmit}
-        sx={{
-          mt: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <Typography component="h1" variant="h5">
-          Sign Up
-        </Typography>
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          id="userName"
-          label="Username"
-          name="username"
-          autoComplete="username"
-          autoFocus
-          value={formData.username}
-          onChange={handleChange}
-        />
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          id="email"
-          label="Email Address"
-          name="email"
-          autoComplete="email"
-          value={formData.email}
-          onChange={handleChange}
-        />
-        <TextField
-          margin="normal"
-          required
-          fullWidth
-          name="password"
-          label="Password"
-          type="password"
-          id="password"
-          autoComplete="new-password"
-          value={formData.password}
-          onChange={handleChange}
-        />
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-          sx={{ mt: 3, mb: 2 }}
+    <div
+      className="login template d-flex
+    justify-content-center align-items-center w-100 vh-100 bg-primary"
+    >
+      <div className="form-container p-5 rounded bg-white">
+        <Form method="post" replace>
+          <h3 className="text-center">Sign Up</h3>
+          <div className="mb-2">
+            <label htmlFor="username">Username</label>
+            <input
+              className="form-control"
+              type="text"
+              name="username"
+              placeholder="Enter Username"
+            />
+          </div>
+          <div className="mb-2">
+            <label htmlFor="email">Email</label>
+            <input
+              className="form-control"
+              type="email"
+              name="email"
+              placeholder="Enter Email"
+            />
+          </div>
+          <div className="mb-2">
+            <label htmlFor="password">Password</label>
+            <input
+              className="form-control"
+              type="password"
+              name="password"
+              placeholder="Enter password"
+            />
+          </div>
+          <div className="d-grid">
+            <button
+              className="btn btn-primary"
+              disabled={ state === 'submitting' }
+            >
+              {state === 'submitting' ? 'Signing up...' : 'Sign Up'}
+            </button>
+          </div>
+        </Form>
+        <span
+          className="d-flex justify-content-center mt-3 p-1"
         >
-          Sign Up
-        </Button>
-        <Grid container>
-            <Grid item>
-              <Link href="/sign-in" variant="body2">
-                {"Already have a account? Sign in."}
-              </Link>
-            </Grid>
-          </Grid>
-          {message && <Typography>{message}</Typography>}
-      </Box>
-    </Container>
+          {actionReturn ? actionReturn.message : null}
+        </span>
+        <div>
+          <a href="/sign-in">Sign in</a>
+        </div>
+      </div>
+    </div>
   );
-};
-
-export default SignUp;
+}
