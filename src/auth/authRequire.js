@@ -5,8 +5,6 @@ import getUserToken from './getUserToken';
 
 export default async function isLoggedIn() {
   const userLocal = getItem('user');
-  console.log('userLocal', userLocal);
-  
 
   if (!userLocal) {
     throw redirect('/sign-in');

@@ -9,7 +9,6 @@ import authLoader from './auth/authLoader';
 import Dashboard from './pages/dashboard/Dashboard';
 import Home from './pages/home/Home';
 import SignInAction from './pages/signin/Actions/SignInAction';
-import signInLoader from './pages/signin/loaders/signInLoader';
 import SignIn from './pages/signin/SignIn';
 import SignUpAction from './pages/signup/Actions/SignUpAction';
 import SignUp from './pages/signup/SignUp';
@@ -24,7 +23,7 @@ function App() {
           action={SignUpAction}
         /> 
         <Route
-          loader={ signInLoader }
+          // loader={ signInLoader }
           action={ SignInAction }
           path="/sign-in"
           element={ <SignIn /> }

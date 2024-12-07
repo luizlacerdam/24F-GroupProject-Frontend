@@ -7,7 +7,7 @@ import {
     Button,
     Container,
     FormControl,
-    Grid,
+    Grid2,
     IconButton,
     InputLabel,
     MenuItem,
@@ -20,20 +20,18 @@ import { useEffect, useState } from "react";
 import { getItem } from "../../utils/localStorageHandling";
 
 // Responsible for handling API requests with tokens:
-import { requestDataWithToken, requestDeleteWithToken, requestPostWithToken } from "../../utils/requests"; 
+import { requestDataWithToken, requestDeleteWithToken, requestPostWithToken } from "../../utils/requests";
 
 
 function Dashboard() {
-    // Responsible for managing user state
-    const [user, setUser] = useState({});
-    // Responsible for managing tickets state
+    const [user, setUser] = useState({
+        username: "",
+        email: "",
+      });
     const [tickets, setTickets] = useState([]);
-    // Responsible for managing ticket description input
     const [ticketDescription, setTicketDescription] = useState("");
-    // Responsible for managing ticket priority input
     const [priority, setPriority] = useState("low");
-
-    // Responsible for fetching tickets for the current user:
+    const [userCellphone, setUserCellphone] = useState("");
     const fetchTickets = async () => {
         try {
             const storedUser = getItem("user");
@@ -135,11 +133,38 @@ function Dashboard() {
                 <Typography variant="h6" gutterBottom>
                     Create a New Ticket
                 </Typography>
-                <Grid container spacing={2}>
+                <Grid2 container spacing={2}>
 
+                    <Grid2 size={{ xs: 12, md: 6 }}>
+                        <TextField
+                            fullWidth
+                            variant="outlined"
+                            value={user.username}
+                            disabled
+                        />
+                    </Grid2>
+
+                    <Grid2 size={{ xs: 12, md: 6 }}>
+                        <TextField
+                            fullWidth
+                            variant="outlined"
+                            value={user.email}
+                            disabled
+                        />
+                    </Grid2>
                     
-                    {/* Responsible for handling ticket priority selection: */}
-                    <Grid item xs={12} md={6}>
+                    <Grid2 size={{ xs: 12, md: 6 }}>
+                        <TextField
+                            fullWidth
+                            label="User Cellphone"
+                            variant="outlined"
+                            value={userCellphone} // Add this state in your component
+                            onChange={(e) => setUserCellphone(e.target.value)} // Handle the input change
+                        />
+                    </Grid2>
+                    
+                        {/* Responsible for handling ticket priority selection: */}
+                    <Grid2 size={{ xs: 12, md: 6 }}>
                         <FormControl fullWidth>
                             <InputLabel id="priority-label">Priority</InputLabel>
                             <Select
@@ -152,10 +177,10 @@ function Dashboard() {
                                 <MenuItem value="high">High</MenuItem>
                             </Select>
                         </FormControl>
-                    </Grid>
+                    </Grid2>
 
                     {/* Responsible for handling ticket description input: */}
-                    <Grid item xs={12} md={6}>
+                    <Grid2 size={{ xs: 12 }}>
                         <TextField
                             fullWidth
                             label="Ticket Description"
@@ -163,20 +188,27 @@ function Dashboard() {
                             value={ticketDescription}
                             onChange={(e) => setTicketDescription(e.target.value)}
                         />
-                    </Grid>
+                    </Grid2>
 
-                    {/* Responsible for creating a new ticket on button click: */}
-                    <Grid item xs={12}>
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            onClick={handleCreateTicket}
-                        >
-                            Create Ticket
-                        </Button>
-                    </Grid>
-                </Grid>
+                        {/* Responsible for capturing the user's cellphone number */}
+                        
+                        
+
+                        {/* Responsible for creating a new ticket on button click: */}
+                    <Grid2 size={{ xs: 12 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                onClick={handleCreateTicket}
+                            >
+                                Create Ticket
+                            </Button>
+                        </Box>
+                    </Grid2>
+                </Grid2>
             </Paper>
+
 
             {/* Responsible for rendering the tickets list: */}
             <Typography variant="h6" gutterBottom>
@@ -184,12 +216,11 @@ function Dashboard() {
             </Typography>
 
             {tickets.length > 0 ? (
-                <Grid container spacing={2}>
+                <Grid2 container spacing={2}>
                     {tickets.map((ticket) => (
-                        <Grid item xs={12} md={4} key={ticket._id}>
+                        <Grid2 size={{xs:12}} key={ticket._id}>
                             <Paper elevation={3} sx={{ p: 2, position: "relative" }}>
-
-                                {/* Responsible for handling ticket deletion: */}
+                                {/* Ticket deletion button */}
                                 <IconButton
                                     onClick={() => handleDeleteTicket(ticket._id)}
                                     color="error"
@@ -198,7 +229,7 @@ function Dashboard() {
                                     <DeleteIcon />
                                 </IconButton>
 
-                                {/* Responsible for displaying ticket details: */}
+                                {/* Ticket details */}
                                 <Typography variant="h6" gutterBottom>
                                     Ticket #{ticket._id}
                                 </Typography>
@@ -207,12 +238,13 @@ function Dashboard() {
                                     Priority: {ticket.priority}
                                 </Typography>
                             </Paper>
-                        </Grid>
+                        </Grid2>
                     ))}
-                </Grid>
+                </Grid2>
             ) : (
-                <Typography> No tickets created yet. </Typography>
+                <Typography>No tickets created yet.</Typography>
             )}
+
         </Container>
     );
 }
