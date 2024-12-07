@@ -223,34 +223,39 @@ function Dashboard() {
                                     </ListItem>
                                 ))}
                             </List>
-                            <FormControl fullWidth sx={{ mt: 2 }}>
-                                <InputLabel id="status-label">Status</InputLabel>
-                                <Select
-                                    labelId="status-label"
-                                    value={updatedStatus}
-                                    onChange={(e) => setUpdatedStatus(e.target.value)}
-                                >
-                                    <MenuItem value="open">Open</MenuItem>
-                                    <MenuItem value="in-progress">In Progress</MenuItem>
-                                    <MenuItem value="closed">Closed</MenuItem>
-                                </Select>
-                            </FormControl>
-                            <TextField
-                                fullWidth
-                                label="Add Comment"
-                                variant="outlined"
-                                value={newComment}
-                                onChange={(e) => setNewComment(e.target.value)}
-                                sx={{ mt: 2 }}
-                            />
-                            <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
-                                <Button variant="contained" color="primary" onClick={handleUpdateTicket}>
-                                    Save Changes
-                                </Button>
-                                <Button variant="outlined" color="secondary" onClick={handleCloseModal}>
-                                    Cancel
-                                </Button>
-                            </Box>
+                            { selectedTicket.status !== 'closed' && (
+                            <> 
+                                <FormControl fullWidth sx={{ mt: 2 }}>
+                                    <InputLabel id="status-label">Status</InputLabel>
+                                    <Select
+                                        labelId="status-label"
+                                        value={updatedStatus}
+                                        onChange={(e) => setUpdatedStatus(e.target.value)}
+                                        >
+                                        <MenuItem value="open">Open</MenuItem>
+                                        <MenuItem value="in-progress">In Progress</MenuItem>
+                                        <MenuItem value="closed">Closed</MenuItem>
+                                    </Select>
+                                </FormControl>
+                                <TextField
+                                    fullWidth
+                                    label="Add Comment"
+                                    variant="outlined"
+                                    value={newComment}
+                                    onChange={(e) => setNewComment(e.target.value)}
+                                    sx={{ mt: 2 }}
+                                    />
+                                
+                                    <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
+                                    <Button variant="contained" color="primary" onClick={handleUpdateTicket}>
+                                        Save Changes
+                                    </Button>
+                                    <Button variant="outlined" color="secondary" onClick={handleCloseModal}>
+                                        Cancel
+                                    </Button>
+                                </Box>
+                            </>
+                            )}
                         </>
                     )}
                 </Box>
