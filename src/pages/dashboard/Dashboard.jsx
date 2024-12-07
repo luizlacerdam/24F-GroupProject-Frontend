@@ -1,73 +1,119 @@
-
-// Responsible for importing necessary components and icons
 import DeleteIcon from "@mui/icons-material/Delete";
-
 import {
     Box,
     Button,
     Container,
+    FormControl,
     Grid2,
     IconButton,
+    InputLabel,
+    List,
+    ListItem,
+    ListItemText,
+    MenuItem,
+    Modal,
     Paper,
+    Select,
+    TextField,
     Typography
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import { getItem } from "../../utils/localStorageHandling";
-
-// Responsible for handling API requests with tokens:
 import CreateNewTicketForm from "../../components/CreateNewTicketForm";
-import { requestDataWithToken, requestDeleteWithToken } from "../../utils/requests";
-
+import { getItem } from "../../utils/localStorageHandling";
+import { requestDataWithToken, requestPatchWithToken, requestPostWithToken } from "../../utils/requests";
 
 function Dashboard() {
     const [user, setUser] = useState({
         username: "",
         email: "",
-      });
+    });
     const [tickets, setTickets] = useState([]);
-    
+    const [selectedTicket, setSelectedTicket] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [newComment, setNewComment] = useState("");
+    const [updatedStatus, setUpdatedStatus] = useState("");
+    const [ticketLogs, setTicketLogs] = useState([]);
+
+    const handleOpenModal = (ticket) => {
+        setSelectedTicket(ticket);
+        setUpdatedStatus(ticket.status);
+        fetchTicketLogs(ticket._id);
+        setIsModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setSelectedTicket(null);
+        setNewComment("");
+        setTicketLogs([]);
+    };
 
     const fetchTickets = async () => {
         try {
             const storedUser = getItem("user");
             const fetchedTickets = await requestDataWithToken(`/tickets/user/${storedUser.id}`, storedUser.token);
-            // Responsible for logging the fetched tickets to verify data retrieval:
-            console.log("Fetched Tickets:", fetchedTickets); 
+            console.log("Fetched Tickets:", fetchedTickets);
             setTickets(fetchedTickets);
         } catch (error) {
             console.error("Error fetching tickets:", error);
         }
     };
 
-    // Responsible for deleting a ticket by its ID:
-    const handleDeleteTicket = async (ticketId) => {
+    const fetchTicketLogs = async (ticketId) => {
         try {
-            const { token } = user;
-            await requestDeleteWithToken(`/tickets/${ticketId}`, token);
-            console.log(`Ticket ${ticketId} deleted.`);
-            // For updating the state to remove deleted ticket:
-            setTickets((prevTickets) => prevTickets.filter((ticket) => ticket._id !== ticketId)); 
+            const fetchedTicketLogs = await requestDataWithToken(`/ticketLogs/${ticketId}`, user.token);
+            console.log("Fetched Ticket Logs:", fetchedTicketLogs);
+            setTicketLogs(fetchedTicketLogs);
         } catch (error) {
-            console.error("Error deleting ticket:", error);
+            console.error("Error fetching ticket logs:", error);
         }
     };
 
-    // Responsible for logging the user out:
-    const handleLogout = () => {
-        localStorage.removeItem("user");
-        window.location.href = "/";
+    const handleCreateTicketLog = async () => {
+        try {
+            const { token } = user;
+            const newTicketLog = {
+                ticketId: selectedTicket._id,
+                customerId: user.id,
+                status: updatedStatus,
+                comment: newComment,
+            };
+            console.log("New Ticket Log:", newTicketLog);
+            
+            // Send update request to the server
+            const result = await requestPostWithToken(`/ticketLogs`, newTicketLog, token);
+            console.log("New Ticket Log Result:", result);
+            handleCloseModal();
+        } catch (error) {
+            console.error("Error updating ticket:", error);
+        }
     };
 
+    const handleUpdateTicket = async () => {
+        try {
+            const { token } = user;
+            const updatedTicket = {
+                status: updatedStatus,
+            };
 
-    // Responsible for setting the user state and fetching tickets on component mount: 
+            await requestPatchWithToken(
+                `/tickets/${selectedTicket._id}`,
+                updatedTicket,
+                token
+            );
+            fetchTickets();
+            handleCreateTicketLog();
+        } catch (error) {
+            console.error("Error updating ticket:", error);
+        }
+    };
+        
+
     useEffect(() => {
         const storedUser = getItem("user");
         setUser(storedUser);
-        // Would  Load the tickets on initial page load:
-        fetchTickets(); 
+        fetchTickets();
     }, []);
-
-
 
     return (
         <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -79,54 +125,55 @@ function Dashboard() {
                     mb: 4,
                 }}
             >
-                {/* Responsible for displaying the dashboard title */}
                 <Typography variant="h4" component="h1" gutterBottom>
                     Dashboard
                 </Typography>
-
-                {/* Responsible for displaying the logout button */}
                 <Button
                     type="button"
                     variant="contained"
                     color="primary"
                     size="large"
                     sx={{ mx: 2 }}
-                    onClick={handleLogout}
+                    onClick={() => {
+                        localStorage.removeItem("user");
+                        window.location.href = "/";
+                    }}
                 >
                     Logout
                 </Button>
             </Box>
-            
 
-            {/* Responsible for rendering the ticket creation form: */}
-            {user.role === 'admin' ? '' : (
+            {user.role !== "admin" && <CreateNewTicketForm user={user} fetchTickets={fetchTickets} />}
 
-                <CreateNewTicketForm user={user} fetchTickets={fetchTickets} />
-            )}
-
-
-            {/* Responsible for rendering the tickets list: */}
             <Typography variant="h6" gutterBottom>
-                Your Tickets
+                Tickets List
             </Typography>
 
             {tickets.length > 0 ? (
                 <Grid2 container spacing={2}>
                     {tickets.map((ticket) => (
-                        <Grid2 size={{xs:12}} key={ticket._id}>
-                            <Paper elevation={3} sx={{ p: 2, position: "relative" }}>
-                                {/* Ticket deletion button */}
+                        <Grid2 size={{xs: 12}} key={ticket._id}>
+                            <Paper
+                                elevation={3}
+                                sx={{ p: 2, position: "relative", cursor: "pointer" }}
+                                onClick={() => handleOpenModal(ticket)}
+                            >
                                 <IconButton
-                                    onClick={() => handleDeleteTicket(ticket._id)}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        // handleDeleteTicket(ticket._id);
+                                    }}
                                     color="error"
                                     sx={{ position: "absolute", top: 8, right: 8 }}
                                 >
                                     <DeleteIcon />
                                 </IconButton>
 
-                                {/* Ticket details */}
                                 <Typography variant="h6" gutterBottom>
                                     Ticket #{ticket._id}
+                                </Typography>
+                                <Typography variant="body2" color="textSecondary">
+                                    Priority: {ticket.status}
                                 </Typography>
                                 <Typography>{ticket.description}</Typography>
                                 <Typography variant="body2" color="textSecondary">
@@ -140,6 +187,74 @@ function Dashboard() {
                 <Typography>No tickets created yet.</Typography>
             )}
 
+            <Modal open={isModalOpen} onClose={handleCloseModal}>
+                <Box
+                    sx={{
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        transform: "translate(-50%, -50%)",
+                        width: 400,
+                        bgcolor: "background.paper",
+                        border: "2px solid #000",
+                        boxShadow: 24,
+                        p: 4,
+                    }}
+                >
+                    {selectedTicket && (
+                        <>
+                            <Typography variant="h6" gutterBottom>
+                                Ticket Logs
+                            </Typography>
+                            <Typography>
+                                <strong>ID:</strong> {selectedTicket._id}
+                            </Typography>
+                            <Typography>
+                                <strong>Description:</strong> {selectedTicket.description}
+                            </Typography>
+                            <List sx={{ mt: 2, maxHeight: 200, overflow: "auto" }}>
+                                {ticketLogs.map((log, index) => (
+                                    <ListItem key={index} divider>
+                                        <ListItemText
+                                            primary={`Status: ${log.status} - ${new Date(log.createdAt).toLocaleString()}`}
+                                            secondary={`Comment: ${log.comment}`}
+                                            
+                                        />
+                                    </ListItem>
+                                ))}
+                            </List>
+                            <FormControl fullWidth sx={{ mt: 2 }}>
+                                <InputLabel id="status-label">Status</InputLabel>
+                                <Select
+                                    labelId="status-label"
+                                    value={updatedStatus}
+                                    onChange={(e) => setUpdatedStatus(e.target.value)}
+                                >
+                                    <MenuItem value="open">Open</MenuItem>
+                                    <MenuItem value="in-progress">In Progress</MenuItem>
+                                    <MenuItem value="closed">Closed</MenuItem>
+                                </Select>
+                            </FormControl>
+                            <TextField
+                                fullWidth
+                                label="Add Comment"
+                                variant="outlined"
+                                value={newComment}
+                                onChange={(e) => setNewComment(e.target.value)}
+                                sx={{ mt: 2 }}
+                            />
+                            <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
+                                <Button variant="contained" color="primary" onClick={handleUpdateTicket}>
+                                    Save Changes
+                                </Button>
+                                <Button variant="outlined" color="secondary" onClick={handleCloseModal}>
+                                    Cancel
+                                </Button>
+                            </Box>
+                        </>
+                    )}
+                </Box>
+            </Modal>
         </Container>
     );
 }
