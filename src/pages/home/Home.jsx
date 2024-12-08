@@ -9,13 +9,14 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem("user");
     window.location.href = "/";
-};
+  };
 
   useEffect(() => {
     const user = getItem("user");
     if (user) {
       setUser(user);
-    }}, []);
+    }
+  }, []);
   
   return (
     <Box>
@@ -58,7 +59,7 @@ function App() {
       >
         <Container maxWidth="md" sx={{ textAlign: "center" }}>
           <Typography variant="h2" component="h1" gutterBottom>
-            Welcome to Merge Conflict Mafia's TicketSystem
+            Welcome to Merge Conflict Mafia TicketSystem
           </Typography>
           <Typography variant="h6" color="textSecondary" paragraph>
             Manage and streamline your ticketing processes with ease. Stay organized, improve response times, and provide better support.
