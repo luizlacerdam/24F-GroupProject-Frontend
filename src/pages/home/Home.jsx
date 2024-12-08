@@ -9,7 +9,7 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem("user");
     window.location.href = "/";
-};
+  };
 
   useEffect(() => {
     const user = getItem("user");

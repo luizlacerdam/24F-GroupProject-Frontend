@@ -1,5 +1,6 @@
-import DeleteIcon from "@mui/icons-material/Delete";
+import MenuIcon from "@mui/icons-material/Menu";
 import {
+    AppBar,
     Box,
     Button,
     Container,
@@ -15,6 +16,7 @@ import {
     Paper,
     Select,
     TextField,
+    Toolbar,
     Typography
 } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -107,7 +109,11 @@ function Dashboard() {
             console.error("Error updating ticket:", error);
         }
     };
-        
+    
+    const handleLogout = () => {
+        localStorage.removeItem("user");
+        window.location.href = "/";
+    };
 
     useEffect(() => {
         const storedUser = getItem("user");
@@ -116,6 +122,26 @@ function Dashboard() {
     }, []);
 
     return (
+        <>
+        <AppBar position="static">
+                <Toolbar>
+                <IconButton
+                    size="large"
+                    edge="start"
+                    color="inherit"
+                    aria-label="menu"
+                    sx={{ mr: 2 }}
+                >
+                    <MenuIcon />
+                </IconButton>
+                <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+                    TicketSystem
+                </Typography>
+                <Button type="button" href="/profile" color="inherit">profile</Button>
+                <Button type="button" onClick={handleLogout} color="inherit">Logout</Button>
+
+                </Toolbar>
+            </AppBar>
         <Container maxWidth="lg" sx={{ py: 4 }}>
             <Box
                 sx={{
@@ -128,19 +154,6 @@ function Dashboard() {
                 <Typography variant="h4" component="h1" gutterBottom>
                     Dashboard
                 </Typography>
-                <Button
-                    type="button"
-                    variant="contained"
-                    color="primary"
-                    size="large"
-                    sx={{ mx: 2 }}
-                    onClick={() => {
-                        localStorage.removeItem("user");
-                        window.location.href = "/";
-                    }}
-                >
-                    Logout
-                </Button>
             </Box>
 
             {user.role !== "admin" && <CreateNewTicketForm user={user} fetchTickets={fetchTickets} />}
@@ -158,20 +171,14 @@ function Dashboard() {
                                 sx={{ p: 2, position: "relative", cursor: "pointer" }}
                                 onClick={() => handleOpenModal(ticket)}
                             >
-                                <IconButton
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        // handleDeleteTicket(ticket._id);
-                                    }}
-                                    color="error"
-                                    sx={{ position: "absolute", top: 8, right: 8 }}
-                                >
-                                    <DeleteIcon />
-                                </IconButton>
-
                                 <Typography variant="h6" gutterBottom>
                                     Ticket #{ticket._id}
                                 </Typography>
+                                { user.role === "admin" && (
+                                    <Typography variant="h6" gutterBottom>
+                                    User #{ticket.customerId.username}
+                                </Typography>
+                                )}
                                 <Typography variant="body2" color="textSecondary">
                                     Priority: {ticket.status}
                                 </Typography>
@@ -217,7 +224,7 @@ function Dashboard() {
                                     <ListItem key={index} divider>
                                         <ListItemText
                                             primary={`Status: ${log.status} - ${new Date(log.createdAt).toLocaleString()}`}
-                                            secondary={`Comment: ${log.comment}`}
+                                            secondary={`Comment by ${log.customerId.username}: ${log.comment}`}
                                             
                                         />
                                     </ListItem>
@@ -261,6 +268,8 @@ function Dashboard() {
                 </Box>
             </Modal>
         </Container>
+    </>
+
     );
 }
 
