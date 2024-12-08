@@ -39,11 +39,13 @@ import {
     const [newComment, setNewComment] = useState("");
     const [updatedStatus, setUpdatedStatus] = useState("");
     const [ticketLogs, setTicketLogs] = useState([]);
-    const [showAllTickets, setShowAllTickets] = useState(false); // State to toggle ticket view
-  
+    const [showAllTickets, setShowAllTickets] = useState(false);
+    const [resolution, setResolution] = useState("");
+
     const handleOpenModal = (ticket) => {
       setSelectedTicket(ticket);
-      setUpdatedStatus(ticket.status);
+      const validStatus = ticket.status === "New" ? "in-progress" : ticket.status;
+      setUpdatedStatus(validStatus || "in-progress");
       fetchTicketLogs(ticket._id);
       setIsModalOpen(true);
     };
@@ -58,12 +60,21 @@ import {
     const fetchTickets = async () => {
       try {
         const storedUser = getItem("user");
+        if (storedUser.role === "admin") {
+          const fetchedTickets = await requestDataWithToken(
+            `/tickets`,
+            storedUser.token
+          );
+          setTickets(fetchedTickets);          
+          return;
+        } else {
         const fetchedTickets = await requestDataWithToken(
           `/tickets/user/${storedUser.id}`,
           storedUser.token
         );
-        console.log("Fetched Tickets:", fetchedTickets);
         setTickets(fetchedTickets);
+        return;
+    }
       } catch (error) {
         console.error("Error fetching tickets:", error);
       }
@@ -89,7 +100,7 @@ import {
           ticketId: selectedTicket._id,
           customerId: user.id,
           status: updatedStatus,
-          comment: newComment,
+          comment: updatedStatus === "closed" ? resolution : newComment,
         };
         console.log("New Ticket Log:", newTicketLog);
   
@@ -101,16 +112,21 @@ import {
     };
   
     const handleUpdateTicket = async () => {
-        if (!newComment.trim()) {
-          console.error("Comment is required.");
-          return;
-        }
+        if (!newComment.trim() && updatedStatus !== "closed") {
+            console.error("Comment is required.");
+            return;
+          }
+        
+          if (updatedStatus === "closed" && !resolution.trim()) {
+            console.error("Resolution is required to close the ticket.");
+            return;
+          }
       
         try {
-          const { token } = user;
-          const updatedTicket = {
-            status: updatedStatus,
-          };
+            const { token } = user;
+            const updatedTicket = {
+                status: updatedStatus,
+            };
       
           await requestPatchWithToken(
             `/tickets/${selectedTicket._id}`,
@@ -137,7 +153,7 @@ import {
   
     const filteredTickets = showAllTickets
       ? tickets
-      : tickets.filter((ticket) => ticket.status !== "closed");
+      : tickets.filter((ticket) => ticket.status !== "closed" && ticket.status !== "cancelled");
   
     return (
       <>
@@ -243,95 +259,123 @@ import {
         </Container>
   
         <Modal open={isModalOpen} onClose={handleCloseModal}>
-          <Box
-            sx={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: 400,
-              bgcolor: "background.paper",
-              border: "2px solid #000",
-              boxShadow: 24,
-              p: 4,
-            }}
-          >
-            {selectedTicket && (
-              <>
-                <Typography variant="h6" gutterBottom>
-                  Ticket Logs
-                </Typography>
-                <List sx={{ mt: 2, maxHeight: 200, overflow: "auto" }}>
-                  {ticketLogs.map((log, index) => (
-                    <ListItem key={index} divider>
-                      <ListItemText
-                        primary={`Status: ${log.status} - ${new Date(
-                          log.createdAt
-                        ).toLocaleString()}`}
-                        secondary={`Comment by ${
-                          log.customerId.username
-                        }: ${log.comment}`}
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-                {selectedTicket.status !== "closed" || selectedTicket.status !== "cancelled"  ? (
-                  <>
-                    <FormControl fullWidth sx={{ mt: 2 }}>
-                      <InputLabel id="status-label">Status</InputLabel>
-                      <Select
-                        labelId="status-label"
-                        value={updatedStatus}
-                        onChange={(e) => setUpdatedStatus(e.target.value)}
-                      >
-                        <MenuItem value="in-progress">In Progress</MenuItem>
-                        <MenuItem value="dispatched">Dispatched</MenuItem>
-                        <MenuItem value="closed">Closed</MenuItem>
-                      </Select>
-                    </FormControl>
-                    <TextField
-                      fullWidth
-                      label="Add Comment"
-                      variant="outlined"
-                      value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                      sx={{ mt: 2 }}
-                      required
-                      error={!newComment.trim()} // Shows error if newComment is empty
-                      helperText={!newComment.trim() ? "Comment is required" : ""}
-                    />
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        mt: 3,
-                      }}
-                    >
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={handleUpdateTicket}
-                      >
-                        Save Changes
-                      </Button>
-                      <Button
-                        variant="outlined"
-                        color="secondary"
-                        onClick={handleCloseModal}
-                      >
-                        Cancel
-                      </Button>
-                    </Box>
-                  </>) : (
-                    <Typography variant="body2" color="textSecondary">
-                      Cant update a closed or cancelled ticket.
+            <Box
+                sx={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                width: 400,
+                bgcolor: "background.paper",
+                border: "2px solid #000",
+                boxShadow: 24,
+                p: 4,
+                }}
+            >
+                {selectedTicket && (
+                <>
+                    <Typography variant="h6" gutterBottom>
+                    Ticket Logs
                     </Typography>
-                  )
-                }
-              </>
-            )}
-          </Box>
+                    <List sx={{ mt: 2, maxHeight: 200, overflow: "auto" }}>
+                    {ticketLogs.map((log, index) => (
+                        <ListItem key={index} divider>
+                        <ListItemText
+                            primary={`Status: ${log.status} - ${new Date(log.createdAt).toLocaleString()}`}
+                            secondary={`Comment by ${log.customerId.username}: ${log.comment}`}
+                        />
+                        </ListItem>
+                    ))}
+                    </List>
+                    {selectedTicket.status !== "closed" && selectedTicket.status !== "cancelled" ? (
+                    <>
+                        <FormControl fullWidth sx={{ mt: 2 }}>
+                        <InputLabel id="status-label">Status</InputLabel>
+                        <Select
+                            labelId="status-label"
+                            value={updatedStatus || "in-progress"}
+                            onChange={(e) => setUpdatedStatus(e.target.value)}
+                        >
+                            {user.role === "admin"
+                            ? [
+                                <MenuItem key="in-progress" value="in-progress">
+                                    In Progress
+                                </MenuItem>,
+                                <MenuItem key="dispatched" value="dispatched">
+                                    Dispatched
+                                </MenuItem>,
+                                <MenuItem key="closed" value="closed">
+                                    Closed
+                                </MenuItem>,
+                                ]
+                            : [
+                                <MenuItem key="cancelled" value="cancelled">
+                                    Cancelled
+                                </MenuItem>,
+                                ]}
+                        </Select>
+                        </FormControl>
+
+                        {/* Conditional Field for Ticket Resolution */}
+                        {updatedStatus === "closed" ? (
+                        <TextField
+                            fullWidth
+                            label="Ticket Resolution"
+                            variant="outlined"
+                            value={resolution}
+                            onChange={(e) => setResolution(e.target.value)}
+                            sx={{ mt: 2 }}
+                            required
+                            error={!resolution.trim()}
+                            helperText={!resolution.trim() ? "Resolution is required to close the ticket" : ""}
+                        />
+                        ) : (
+                        <TextField
+                            fullWidth
+                            label="Add Comment"
+                            variant="outlined"
+                            value={newComment}
+                            onChange={(e) => setNewComment(e.target.value)}
+                            sx={{ mt: 2 }}
+                            required
+                            error={!newComment.trim()}
+                            helperText={!newComment.trim() ? "Comment is required" : ""}
+                        />
+                        )}
+
+                        <Box
+                        sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            mt: 3,
+                        }}
+                        >
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={handleUpdateTicket}
+                        >
+                            Save Changes
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            color="secondary"
+                            onClick={handleCloseModal}
+                        >
+                            Cancel
+                        </Button>
+                        </Box>
+                    </>
+                    ) : (
+                    <Typography variant="body2" color="textSecondary">
+                        Cant update a closed or cancelled ticket.
+                    </Typography>
+                    )}
+                </>
+                )}
+            </Box>
         </Modal>
+
       </>
     );
   }
