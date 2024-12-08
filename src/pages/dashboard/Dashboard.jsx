@@ -1,31 +1,31 @@
 import MenuIcon from "@mui/icons-material/Menu";
 import {
-    AppBar,
-    Box,
-    Button,
-    Container,
-    FormControl,
-    Grid2,
-    IconButton,
-    InputLabel,
-    List,
-    ListItem,
-    ListItemText,
-    MenuItem,
-    Modal,
-    Paper,
-    Select,
-    TextField,
-    Toolbar,
-    Typography,
+  AppBar,
+  Box,
+  Button,
+  Container,
+  FormControl,
+  Grid2,
+  IconButton,
+  InputLabel,
+  List,
+  ListItem,
+  ListItemText,
+  MenuItem,
+  Modal,
+  Paper,
+  Select,
+  TextField,
+  Toolbar,
+  Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import CreateNewTicketForm from "../../components/CreateNewTicketForm";
 import { getItem } from "../../utils/localStorageHandling";
 import {
-    requestDataWithToken,
-    requestPatchWithToken,
-    requestPostWithToken,
+  requestDataWithToken,
+  requestPatchWithToken,
+  requestPostWithToken,
 } from "../../utils/requests";
   
   function Dashboard() {
@@ -230,7 +230,7 @@ import {
                     onClick={() => handleOpenModal(ticket)}
                   >
                     <Typography variant="h6" gutterBottom>
-                      Ticket #{ticket._id}
+                      Ticket #{ticket.recordNumber}
                     </Typography>
                     <Typography variant="h8" gutterBottom>
                       Created at {new Date(

@@ -11,7 +11,7 @@ export default function SignIn() {
     >
       <div className="form-container p-5 rounded bg-white">
         <Form method="post" replace>
-          <h3 className="text-center">Login</h3>
+          <h3 className="text-center">Sign in</h3>
           <div className="mb-2">
             <label htmlFor="email">Email</label>
             <input
