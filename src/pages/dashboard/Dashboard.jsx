@@ -141,7 +141,7 @@ function Dashboard() {
                 <Button type="button" onClick={handleLogout} color="inherit">Logout</Button>
 
                 </Toolbar>
-            </AppBar>
+        </AppBar>
         <Container maxWidth="lg" sx={{ py: 4 }}>
             <Box
                 sx={{

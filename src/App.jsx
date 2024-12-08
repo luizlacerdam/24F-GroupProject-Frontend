@@ -8,6 +8,7 @@ import {
 import authLoader from './auth/authLoader';
 import Dashboard from './pages/dashboard/Dashboard';
 import Home from './pages/home/Home';
+import Profile from './pages/profile/Profile';
 import SignInAction from './pages/signin/Actions/SignInAction';
 import SignIn from './pages/signin/SignIn';
 import SignUpAction from './pages/signup/Actions/SignUpAction';
@@ -32,6 +33,9 @@ function App() {
         {/* Protected Routes */}
         <Route loader={authLoader}>
           <Route path="/dashboard" element={<Dashboard />} />
+        </Route>
+        <Route loader={authLoader}>
+          <Route path="/profile" element={<Profile />} />
         </Route>
         
       </Route>
