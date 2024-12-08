@@ -101,22 +101,27 @@ import {
     };
   
     const handleUpdateTicket = async () => {
-      try {
-        const { token } = user;
-        const updatedTicket = {
-          status: updatedStatus,
-        };
-  
-        await requestPatchWithToken(
-          `/tickets/${selectedTicket._id}`,
-          updatedTicket,
-          token
-        );
-        fetchTickets();
-        handleCreateTicketLog();
-      } catch (error) {
-        console.error("Error updating ticket:", error);
-      }
+        if (!newComment.trim()) {
+          console.error("Comment is required.");
+          return;
+        }
+      
+        try {
+          const { token } = user;
+          const updatedTicket = {
+            status: updatedStatus,
+          };
+      
+          await requestPatchWithToken(
+            `/tickets/${selectedTicket._id}`,
+            updatedTicket,
+            token
+          );
+          fetchTickets();
+          handleCreateTicketLog();
+        } catch (error) {
+          console.error("Error updating ticket:", error);
+        }
     };
   
     const handleLogout = () => {
@@ -182,7 +187,7 @@ import {
                 flexDirection="row"
                 justifyContent="space-between"
                 alignItems="center"
-                mb={2} // Adds margin-bottom for spacing
+                mb={2}
             >
             <Typography variant="h6" gutterBottom>
                 Tickets List
@@ -210,6 +215,11 @@ import {
                   >
                     <Typography variant="h6" gutterBottom>
                       Ticket #{ticket._id}
+                    </Typography>
+                    <Typography variant="h8" gutterBottom>
+                      Created at {new Date(
+                          ticket.createdAt
+                        ).toLocaleString()}
                     </Typography>
                     {user.role === "admin" && (
                       <Typography variant="body2" color="textSecondary">
@@ -265,7 +275,7 @@ import {
                     </ListItem>
                   ))}
                 </List>
-                {selectedTicket.status !== "closed" && (
+                {selectedTicket.status !== "closed" || selectedTicket.status !== "cancelled"  ? (
                   <>
                     <FormControl fullWidth sx={{ mt: 2 }}>
                       <InputLabel id="status-label">Status</InputLabel>
@@ -274,8 +284,8 @@ import {
                         value={updatedStatus}
                         onChange={(e) => setUpdatedStatus(e.target.value)}
                       >
-                        <MenuItem value="open">Open</MenuItem>
                         <MenuItem value="in-progress">In Progress</MenuItem>
+                        <MenuItem value="dispatched">Dispatched</MenuItem>
                         <MenuItem value="closed">Closed</MenuItem>
                       </Select>
                     </FormControl>
@@ -286,6 +296,9 @@ import {
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
                       sx={{ mt: 2 }}
+                      required
+                      error={!newComment.trim()} // Shows error if newComment is empty
+                      helperText={!newComment.trim() ? "Comment is required" : ""}
                     />
                     <Box
                       sx={{
@@ -309,8 +322,12 @@ import {
                         Cancel
                       </Button>
                     </Box>
-                  </>
-                )}
+                  </>) : (
+                    <Typography variant="body2" color="textSecondary">
+                      Cant update a closed or cancelled ticket.
+                    </Typography>
+                  )
+                }
               </>
             )}
           </Box>

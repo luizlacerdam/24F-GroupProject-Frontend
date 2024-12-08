@@ -15,7 +15,7 @@ const CreateNewTicketForm = ({user, fetchTickets}) => {
             const newTicket = await requestPostWithToken(
                 "/tickets",
                 {
-                    status: "open",
+                    status: "New",
                     customerId: id,
                     description: ticketDescription,
                     priority,
